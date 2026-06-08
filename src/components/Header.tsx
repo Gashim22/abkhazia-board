@@ -2,6 +2,45 @@
 
 import Link from 'next/link'
 import { Search } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, FormEvent, Suspense } from 'react'
+
+function SearchInput({ className }: { className?: string }) {
+  const router      = useRouter()
+  const searchParams = useSearchParams()
+  const [value, setValue] = useState('')
+
+  // Подставляем текущий запрос при возврате на страницу поиска
+  useEffect(() => {
+    setValue(searchParams.get('q') ?? '')
+  }, [searchParams])
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    const q = value.trim()
+    if (q) router.push(`/search?q=${encodeURIComponent(q)}`)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={className}>
+      <div className="relative w-full">
+        <Search
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Поиск по объявлениям..."
+          className="w-full pl-9 pr-4 py-2 text-sm bg-[#f4f7f5] border border-gray-200 rounded-lg
+                     outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
+                     transition-colors"
+        />
+      </div>
+    </form>
+  )
+}
 
 export default function Header() {
   return (
@@ -13,20 +52,10 @@ export default function Header() {
           Абхазия.ру
         </Link>
 
-        {/* Поиск — скрывается на мобильном */}
-        <div className="hidden md:flex flex-1 relative">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Поиск по объявлениям..."
-            className="w-full pl-9 pr-4 py-2 text-sm bg-[#f4f7f5] border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
-                       transition-colors"
-          />
-        </div>
+        {/* Поиск — десктоп */}
+        <Suspense fallback={<div className="hidden md:flex flex-1" />}>
+          <SearchInput className="hidden md:flex flex-1" />
+        </Suspense>
 
         {/* Правая часть */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
@@ -38,7 +67,6 @@ export default function Header() {
             + Подать объявление
           </Link>
 
-          {/* Мобильная версия кнопки — только иконка «+» */}
           <Link
             href="/listings/new"
             className="sm:hidden flex items-center justify-center w-9 h-9
@@ -60,19 +88,9 @@ export default function Header() {
 
       {/* Поиск на мобильном — отдельная строка под шапкой */}
       <div className="md:hidden px-4 pb-3">
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
-          <input
-            type="text"
-            placeholder="Поиск по объявлениям..."
-            className="w-full pl-8 pr-4 py-2 text-sm bg-[#f4f7f5] border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
-                       transition-colors"
-          />
-        </div>
+        <Suspense fallback={null}>
+          <SearchInput />
+        </Suspense>
       </div>
     </header>
   )
