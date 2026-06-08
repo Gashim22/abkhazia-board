@@ -40,15 +40,9 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-
   return (
     <div style={{ padding: 40 }}>
       <h1>Войти</h1>
-      {/* Диагностика — удалить после починки */}
-      <p style={{ fontSize: 12, color: '#888', background: '#f0f0f0', padding: 8, borderRadius: 4 }}>
-        Supabase URL: {supabaseUrl ? supabaseUrl.slice(0, 40) + '...' : '❌ НЕ ЗАДАН'}
-      </p>
       <input
         type="email"
         placeholder="Email"
