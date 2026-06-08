@@ -1,22 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Маршруты только для авторизованных пользователей
-const PROTECTED = ['/create', '/profile', '/messages']
-
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  let supabaseResponse = NextResponse.next({ request })
 
-  // Проверяем только защищённые маршруты
-  const isProtected = PROTECTED.some((path) => pathname.startsWith(path))
-  if (!isProtected) return NextResponse.next()
-
-  // Создаём response-объект, который middleware может модифицировать
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  })
-
-  // Supabase SSR клиент с поддержкой cookies
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,28 +13,33 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          })
+          )
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
-  // Получаем сессию пользователя
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Если не авторизован — редирект на /login
-  if (!session) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  if (!user && (
+    request.nextUrl.pathname.startsWith('/create') ||
+    request.nextUrl.pathname.startsWith('/profile') ||
+    request.nextUrl.pathname.startsWith('/messages')
+  )) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
-  return response
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/create/:path*', '/profile/:path*', '/messages/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

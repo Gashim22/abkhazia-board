@@ -4,13 +4,14 @@ import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, FormEvent, Suspense } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
 
 function SearchInput({ className }: { className?: string }) {
-  const router      = useRouter()
+  const router       = useRouter()
   const searchParams = useSearchParams()
   const [value, setValue] = useState('')
 
-  // Подставляем текущий запрос при возврате на страницу поиска
   useEffect(() => {
     setValue(searchParams.get('q') ?? '')
   }, [searchParams])
@@ -42,6 +43,65 @@ function SearchInput({ className }: { className?: string }) {
   )
 }
 
+function AuthButtons() {
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  useEffect(() => {
+    // Получаем текущего пользователя
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user)
+      setLoading(false)
+    })
+
+    // Слушаем изменения сессии (вход / выход)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+
+  if (loading) {
+    return <div className="w-20 h-9 bg-gray-100 rounded-lg animate-pulse" />
+  }
+
+  if (user) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="hidden sm:block text-sm text-gray-600 max-w-[140px] truncate">
+          {user.email}
+        </span>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300
+                     hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          Выйти
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href="/login"
+      className="px-4 py-2 text-sm font-medium text-[#1a6b3c] border border-[#1a6b3c]
+                 hover:bg-[#1a6b3c] hover:text-white rounded-lg transition-colors"
+    >
+      Войти
+    </Link>
+  )
+}
+
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
@@ -60,7 +120,7 @@ export default function Header() {
         {/* Правая часть */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
           <Link
-            href="/listings/new"
+            href="/create"
             className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium
                        text-white bg-[#1a6b3c] hover:bg-[#2d9e5f] rounded-lg transition-colors"
           >
@@ -68,7 +128,7 @@ export default function Header() {
           </Link>
 
           <Link
-            href="/listings/new"
+            href="/create"
             className="sm:hidden flex items-center justify-center w-9 h-9
                        text-white bg-[#1a6b3c] hover:bg-[#2d9e5f] rounded-lg text-lg font-bold transition-colors"
             aria-label="Подать объявление"
@@ -76,18 +136,12 @@ export default function Header() {
             +
           </Link>
 
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-medium text-[#1a6b3c] border border-[#1a6b3c]
-                       hover:bg-[#1a6b3c] hover:text-white rounded-lg transition-colors"
-          >
-            Войти
-          </Link>
+          <AuthButtons />
         </div>
 
       </div>
 
-      {/* Поиск на мобильном — отдельная строка под шапкой */}
+      {/* Поиск на мобильном */}
       <div className="md:hidden px-4 pb-3">
         <Suspense fallback={null}>
           <SearchInput />
