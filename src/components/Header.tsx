@@ -76,12 +76,13 @@ export default function Header() {
             +
           </Link>
 
-          <button
+          <Link
+            href="/login"
             className="px-4 py-2 text-sm font-medium text-[#1a6b3c] border border-[#1a6b3c]
                        hover:bg-[#1a6b3c] hover:text-white rounded-lg transition-colors"
           >
             Войти
-          </button>
+          </Link>
         </div>
 
       </div>
