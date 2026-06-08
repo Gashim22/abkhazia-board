@@ -45,6 +45,11 @@ export async function GET() {
       ok: false,
       step: 'exception',
       error: e instanceof Error ? e.message : String(e),
+      // Показываем что именно сохранено в переменных
+      url_raw:     JSON.stringify(url),
+      url_length:  url.length,
+      key_length:  key.length,
+      key_preview: key.slice(0, 30) + '...',
     })
   }
 }
