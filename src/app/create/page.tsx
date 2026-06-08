@@ -464,23 +464,217 @@ function Step2({
   )
 }
 
-// ─── Главная страница ─────────────────────────────────────────
-export default function CreatePage() {
-  const [step,       setStep]       = useState(1)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [cities,     setCities]     = useState<City[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [userId,     setUserId]     = useState<string | null>(null)
+// ─── ШАГ 3: Предпросмотр и публикация ───────────────────────
+function Step3({
+  form, categories, cities, userId,
+  onBack, onPublished,
+}: {
+  form:       FormData
+  categories: Category[]
+  cities:     City[]
+  userId:     string | null
+  onBack:     () => void
+  onPublished:(id: string) => void
+}) {
+  const [publishing, setPublishing] = useState(false)
+  const [error,      setError]      = useState<string | null>(null)
 
-  const [form, setForm] = useState<FormData>({
-    category_id:   null,
-    title:         '',
-    description:   '',
-    price:         '',
-    is_negotiable: false,
-    city_id:       null,
-    photos:        [],
-  })
+  const category = categories.find(c => c.id === form.category_id)
+  const city     = cities.find(c => c.id === form.city_id)
+  const photos   = form.photos.filter(p => p.storageUrl)
+
+  function formatPrice() {
+    if (form.is_negotiable) return 'Договорная'
+    if (!form.price)        return 'Не указана'
+    return Number(form.price).toLocaleString('ru-RU') + ' ₽'
+  }
+
+  const summary = [
+    { label: 'Категория', value: category ? `${category.icon ?? ''} ${category.name}` : '—' },
+    { label: 'Город',     value: city?.name ?? '—' },
+    { label: 'Цена',      value: formatPrice() },
+    { label: 'Фотографий',value: String(photos.length) },
+    { label: 'Символов в описании', value: String(form.description.length) },
+  ]
+
+  async function handlePublish() {
+    if (!userId) { setError('Необходимо войти в аккаунт'); return }
+    setPublishing(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { data, error: err } = await supabase
+      .from('listings')
+      .insert({
+        user_id:     userId,
+        category_id: form.category_id,
+        city_id:     form.city_id,
+        title:       form.title.trim(),
+        description: form.description.trim(),
+        price:       form.is_negotiable ? null : Number(form.price) || null,
+        photos:      photos.map(p => p.storageUrl!),
+        status:      'active',
+      })
+      .select('id')
+      .single()
+
+    if (err || !data) {
+      setError(err?.message ?? 'Ошибка при публикации')
+      setPublishing(false)
+      return
+    }
+    onPublished(data.id)
+  }
+
+  return (
+    <div className="space-y-6">
+
+      {/* Превью объявления */}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        {/* Фото обложки */}
+        {photos[0] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photos[0].storageUrl!} alt="Обложка"
+               className="w-full h-56 object-cover" />
+        ) : (
+          <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-300 text-5xl">
+            📷
+          </div>
+        )}
+
+        <div className="p-5">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{form.title}</h2>
+          <p className="text-2xl font-bold text-[#1a6b3c] mb-3">{formatPrice()}</p>
+
+          <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
+            {city     && <span>📍 {city.name}</span>}
+            {category && <span>🏷 {category.name}</span>}
+            <span>📅 Только что</span>
+          </div>
+
+          {form.description && (
+            <p className="text-sm text-gray-600 line-clamp-3 whitespace-pre-wrap">
+              {form.description}
+            </p>
+          )}
+
+          {/* Мини-галерея */}
+          {photos.length > 1 && (
+            <div className="flex gap-2 mt-4 overflow-x-auto">
+              {photos.slice(1).map((p, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={p.storageUrl!} alt=""
+                     className="w-14 h-14 rounded-lg object-cover shrink-0 border border-gray-100" />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Чек-лист заполненных данных */}
+      <div className="bg-[#f4f7f5] rounded-xl border border-green-100 p-5">
+        <h3 className="text-sm font-semibold text-[#1a6b3c] mb-4 flex items-center gap-2">
+          ✅ Ваше объявление готово к публикации
+        </h3>
+        <div className="divide-y divide-green-100">
+          {summary.map(({ label, value }) => (
+            <div key={label} className="flex justify-between py-2 text-sm">
+              <span className="text-gray-500">{label}</span>
+              <span className="font-medium text-gray-800">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Ошибка публикации */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl p-4">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* Кнопки */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="button" onClick={onBack}
+          disabled={publishing}
+          className="px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl
+                     hover:border-gray-400 transition-colors disabled:opacity-50">
+          ← Редактировать
+        </button>
+        <button type="button" onClick={handlePublish}
+          disabled={publishing}
+          className="flex-1 py-4 bg-[#1a6b3c] text-white font-bold text-lg rounded-xl
+                     hover:bg-[#2d9e5f] active:scale-95 transition-all
+                     disabled:opacity-60 disabled:cursor-not-allowed">
+          {publishing ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              Публикуем...
+            </span>
+          ) : '🚀 Опубликовать объявление'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Экран успеха ─────────────────────────────────────────────
+function SuccessScreen({
+  listingId, onReset,
+}: {
+  listingId: string
+  onReset:   () => void
+}) {
+  return (
+    <div className="text-center py-10">
+      <div className="text-7xl mb-6">🎉</div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        Объявление опубликовано!
+      </h2>
+      <p className="text-gray-500 mb-8">
+        Ваше объявление уже доступно всем пользователям сайта
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <a
+          href={`/listing/${listingId}`}
+          className="px-8 py-3 bg-[#1a6b3c] text-white font-medium rounded-xl
+                     hover:bg-[#2d9e5f] transition-colors"
+        >
+          Смотреть объявление →
+        </a>
+        <button
+          type="button"
+          onClick={onReset}
+          className="px-8 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl
+                     hover:border-gray-400 transition-colors"
+        >
+          Подать ещё одно
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Главная страница ─────────────────────────────────────────
+const EMPTY_FORM: FormData = {
+  category_id:   null,
+  title:         '',
+  description:   '',
+  price:         '',
+  is_negotiable: false,
+  city_id:       null,
+  photos:        [],
+}
+
+export default function CreatePage() {
+  const [step,        setStep]        = useState(1)
+  const [categories,  setCategories]  = useState<Category[]>([])
+  const [cities,      setCities]      = useState<City[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [userId,      setUserId]      = useState<string | null>(null)
+  const [publishedId, setPublishedId] = useState<string | null>(null)
+  const [form,        setForm]        = useState<FormData>(EMPTY_FORM)
 
   useEffect(() => {
     const supabase = createClient()
@@ -495,6 +689,21 @@ export default function CreatePage() {
       setLoading(false)
     })
   }, [])
+
+  function reset() {
+    setForm(EMPTY_FORM)
+    setPublishedId(null)
+    setStep(1)
+  }
+
+  // Экран успеха
+  if (publishedId) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <SuccessScreen listingId={publishedId} onReset={reset} />
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -527,10 +736,17 @@ export default function CreatePage() {
               }))}
               userId={userId}
               onBack={() => setStep(1)}
-              onNext={() => {
-                // TODO: шаг 3 — контакты и публикация
-                alert('Шаг 2 завершён! Шаг 3 будет добавлен в следующем обновлении.')
-              }}
+              onNext={() => setStep(3)}
+            />
+          )}
+          {step === 3 && (
+            <Step3
+              form={form}
+              categories={categories}
+              cities={cities}
+              userId={userId}
+              onBack={() => setStep(2)}
+              onPublished={setPublishedId}
             />
           )}
         </>
