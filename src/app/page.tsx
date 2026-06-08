@@ -17,8 +17,8 @@ interface Listing {
   photos: string[]
   score: number
   created_at: string
-  cities: { name: string } | null
-  categories: { name: string } | null
+  cities: { name: string }[] | null
+  categories: { name: string }[] | null
 }
 
 async function getCategories(): Promise<Category[]> {
@@ -170,8 +170,8 @@ export default async function HomePage() {
                   photos={listing.photos}
                   score={listing.score}
                   createdAt={listing.created_at}
-                  city={listing.cities?.name ?? null}
-                  category={listing.categories?.name ?? null}
+                  city={listing.cities?.[0]?.name ?? null}
+                  category={listing.categories?.[0]?.name ?? null}
                 />
               ))}
             </div>
