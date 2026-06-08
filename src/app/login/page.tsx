@@ -13,24 +13,42 @@ export default function LoginPage() {
   const supabase = createClient()
 
   const handleLogin = async () => {
+    console.log('=== Кнопка нажата ===', email, password)
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
-    if (error) {
-      setError(error.message)
-    } else {
-      router.push('/')
-      router.refresh()
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+      console.log('Ответ Supabase:', { data, error })
+
+      if (error) {
+        console.error('Ошибка входа:', error)
+        setError(`Ошибка: ${error.message}`)
+      } else {
+        console.log('Вход успешен, редирект на /')
+        router.push('/')
+        router.refresh()
+      }
+    } catch (e) {
+      console.error('Исключение:', e)
+      setError(`Исключение: ${String(e)}`)
     }
+
     setLoading(false)
   }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 
   return (
     <div style={{ padding: 40 }}>
       <h1>Войти</h1>
+      {/* Диагностика — удалить после починки */}
+      <p style={{ fontSize: 12, color: '#888', background: '#f0f0f0', padding: 8, borderRadius: 4 }}>
+        Supabase URL: {supabaseUrl ? supabaseUrl.slice(0, 40) + '...' : '❌ НЕ ЗАДАН'}
+      </p>
       <input
         type="email"
         placeholder="Email"
