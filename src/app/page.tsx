@@ -2,49 +2,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ListingCard from '@/components/ListingCard'
 
-const MOCK_LISTINGS = [
-  {
-    id: 'mock-1',
-    title: 'Toyota Camry 2020, отличное состояние, один хозяин',
-    price: 2500000,
-    photos: [],
-    city: 'Сухум',
-    category: 'Авто',
-    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    score: 250,
-  },
-  {
-    id: 'mock-2',
-    title: 'Квартира 2-комнатная, центр Гагры, вид на море',
-    price: 4800000,
-    photos: [],
-    city: 'Гагра',
-    category: 'Недвижимость',
-    createdAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
-    score: 0,
-  },
-  {
-    id: 'mock-3',
-    title: 'iPhone 15 Pro 256GB, Space Black, полный комплект',
-    price: 89000,
-    photos: [],
-    city: 'Сухум',
-    category: 'Электроника',
-    createdAt: new Date(Date.now() - 86400 * 1000).toISOString(),
-    score: 0,
-  },
-  {
-    id: 'mock-4',
-    title: 'Диван угловой, ткань, почти новый',
-    price: null,
-    photos: [],
-    city: 'Очамчыра',
-    category: 'Мебель',
-    createdAt: new Date(Date.now() - 3 * 86400 * 1000).toISOString(),
-    score: 0,
-  },
-]
-
 interface Category {
   id: number
   name: string
@@ -53,10 +10,20 @@ interface Category {
   listings_count: number
 }
 
+interface Listing {
+  id: string
+  title: string
+  price: number | null
+  photos: string[]
+  score: number
+  created_at: string
+  cities: { name: string } | null
+  categories: { name: string } | null
+}
+
 async function getCategories(): Promise<Category[]> {
   const supabase = createClient()
 
-  // Загружаем категории верхнего уровня
   const { data: categories, error } = await supabase
     .from('categories')
     .select('id, name, slug, icon')
@@ -65,7 +32,6 @@ async function getCategories(): Promise<Category[]> {
 
   if (error || !categories) return []
 
-  // Считаем активные объявления по каждой категории
   const { data: counts } = await supabase
     .from('listings')
     .select('category_id')
@@ -82,8 +48,35 @@ async function getCategories(): Promise<Category[]> {
   }))
 }
 
+async function getListings(): Promise<Listing[]> {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('listings')
+    .select(`
+      id,
+      title,
+      price,
+      photos,
+      score,
+      created_at,
+      cities ( name ),
+      categories ( name )
+    `)
+    .eq('status', 'active')
+    .order('score', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (error || !data) return []
+  return data as Listing[]
+}
+
 export default async function HomePage() {
-  const categories = await getCategories()
+  const [categories, listings] = await Promise.all([
+    getCategories(),
+    getListings(),
+  ])
 
   return (
     <div className="-mx-4 -mt-6">
@@ -152,11 +145,50 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {MOCK_LISTINGS.map((listing) => (
-            <ListingCard key={listing.id} {...listing} />
-          ))}
-        </div>
+        {listings.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-5xl mb-4">📋</p>
+            <p className="text-lg font-medium">Объявлений пока нет</p>
+            <p className="text-sm mt-1">Будьте первым — подайте объявление</p>
+            <Link
+              href="/listings/new"
+              className="inline-block mt-6 px-6 py-2 bg-[#1a6b3c] text-white
+                         text-sm font-medium rounded-lg hover:bg-[#2d9e5f] transition-colors"
+            >
+              Подать объявление
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  id={listing.id}
+                  title={listing.title}
+                  price={listing.price}
+                  photos={listing.photos}
+                  score={listing.score}
+                  createdAt={listing.created_at}
+                  city={listing.cities?.name ?? null}
+                  category={listing.categories?.name ?? null}
+                />
+              ))}
+            </div>
+
+            {/* Кнопка «Показать больше» */}
+            <div className="text-center mt-10">
+              <Link
+                href="/listings"
+                className="inline-block px-8 py-3 border-2 border-[#1a6b3c] text-[#1a6b3c]
+                           font-medium rounded-xl hover:bg-[#1a6b3c] hover:text-white
+                           transition-colors"
+              >
+                Показать больше
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
     </div>
