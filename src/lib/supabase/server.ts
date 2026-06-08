@@ -1,28 +1,11 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
+// Простой серверный клиент без cookies.
+// Используется для чтения публичных данных (listings, categories, cities).
+// Когда добавим авторизацию — переключимся на createServerClient из @supabase/ssr.
 export function createClient() {
-  const cookieStore = cookies()
-
-  return createServerClient(
+  return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // setAll called from a Server Component — cookies can't be set.
-            // Middleware handles session refresh instead.
-          }
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }
