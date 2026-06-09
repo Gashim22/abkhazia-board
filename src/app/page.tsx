@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ListingCard from '@/components/ListingCard'
@@ -52,8 +53,11 @@ async function getListings(): Promise<Listing[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('listings')
-    .select(`id, title, price, photos, score, created_at,
-             cities ( name ), categories ( name )`)
+    .select(`
+      *,
+      cities(name),
+      categories(name, slug)
+    `)
     .eq('status', 'active')
     .order('score', { ascending: false })
     .order('created_at', { ascending: false })
@@ -66,6 +70,8 @@ async function getListings(): Promise<Listing[]> {
 /* ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
+  // headers() принудительно делает страницу динамической — Vercel не кэширует
+  headers()
   const [categories, listings] = await Promise.all([getCategories(), getListings()])
 
   return (
