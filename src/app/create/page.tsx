@@ -267,7 +267,7 @@ function Step2({
       const ext  = item.file.name.split('.').pop()
       const path = `${userId ?? 'anon'}/${item.id}.${ext}`
 
-      const { data: storageData, error: storageError } = await supabase.storage
+      const { error: storageError } = await supabase.storage
         .from('listings')
         .upload(path, item.file, { upsert: true })
 
