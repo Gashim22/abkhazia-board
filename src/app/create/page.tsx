@@ -267,24 +267,20 @@ function Step2({
       const ext  = item.file.name.split('.').pop()
       const path = `${userId ?? 'anon'}/${item.id}.${ext}`
 
-      console.log('7. Загрузка фото в Storage, путь:', path, 'userId:', userId)
       const { data: storageData, error: storageError } = await supabase.storage
         .from('listings')
         .upload(path, item.file, { upsert: true })
 
-      console.log('8. Фото результат:', { storageData, storageError })
       clearInterval(interval)
 
       if (storageError) {
-        console.error('❌ Ошибка загрузки фото:', storageError.message)
         setPhotos(p => p.map(x =>
           x.id === item.id
-            ? { ...x, uploading: false, progress: 0, error: 'Ошибка загрузки' }
+            ? { ...x, uploading: false, progress: 0, error: `Ошибка: ${storageError.message}` }
             : x
         ))
       } else {
         const { data } = supabase.storage.from('listings').getPublicUrl(path)
-        console.log('✅ Фото загружено, publicUrl:', data.publicUrl)
         setPhotos(p => p.map(x =>
           x.id === item.id
             ? { ...x, uploading: false, progress: 100, storageUrl: data.publicUrl }
@@ -502,27 +498,13 @@ function Step3({
   ]
 
   async function handlePublish() {
-    console.log('1. Начало отправки')
-
     if (!userId) {
-      console.log('❌ userId отсутствует — пользователь не авторизован')
-      setError('Необходимо войти в аккаунт')
+      setError('Шаг 1 ❌ — пользователь не авторизован (userId пустой). Выйди и войди снова.')
       return
     }
 
     setPublishing(true)
     setError(null)
-
-    console.log('2. User ID:', userId)
-    console.log('3. Данные формы:', {
-      title:       form.title,
-      description: form.description,
-      price:       form.price,
-      is_negotiable: form.is_negotiable,
-      city_id:     form.city_id,
-      category_id: form.category_id,
-    })
-    console.log('4. Фото готовых (storageUrl):', photos.length, photos.map(p => p.storageUrl))
 
     const payload = {
       user_id:     userId,
@@ -534,7 +516,6 @@ function Step3({
       photos:      photos.map(p => p.storageUrl!),
       status:      'active',
     }
-    console.log('5. Отправляем в Supabase...', payload)
 
     const supabase = createClient()
     const { data, error: err } = await supabase
@@ -543,16 +524,12 @@ function Step3({
       .select('id')
       .single()
 
-    console.log('6. Результат:', { data, error: err })
-
     if (err || !data) {
-      console.error('❌ Ошибка публикации:', err?.message, err?.details, err?.hint)
-      setError(err?.message ?? 'Ошибка при публикации')
+      setError(`Ошибка Supabase: ${err?.message ?? 'нет данных'} | code: ${err?.code ?? '—'} | hint: ${err?.hint ?? '—'}`)
       setPublishing(false)
       return
     }
 
-    console.log('✅ Объявление опубликовано, id:', data.id)
     onPublished(data.id)
   }
 
