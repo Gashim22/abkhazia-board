@@ -44,21 +44,33 @@ export default function ListingOwnerPanel({
     const ok = window.confirm('Вы уверены? Объявление будет удалено навсегда.')
     if (!ok) return
     setLoading(true)
-    // Soft delete — меняем статус на 'deleted' вместо физического удаления
-    // Это надёжнее: не зависит от RLS DELETE политики
+
+    // Пробуем физическое удаление
     const { error } = await supabase
       .from('listings')
-      .update({ status: 'deleted' })
+      .delete()
       .eq('id', listingId)
-      .eq('user_id', userId)   // только своё объявление
+      .eq('user_id', userId)
+
     if (error) {
-      alert(`Ошибка: ${error.message}`)
-      setLoading(false)
-      return
+      // Если DELETE заблокирован RLS — делаем soft delete
+      const { error: softErr } = await supabase
+        .from('listings')
+        .update({ status: 'deleted' })
+        .eq('id', listingId)
+        .eq('user_id', userId)
+
+      if (softErr) {
+        alert(`Ошибка удаления: ${softErr.message}`)
+        setLoading(false)
+        return
+      }
     }
+
     alert('Объявление удалено')
-    router.push('/')
-    router.refresh()
+    // window.location.href вместо router.push —
+    // принудительная полная перезагрузка страницы
+    window.location.href = '/'
   }
 
   return (
