@@ -7,6 +7,7 @@ import PhotoGallery from '@/components/PhotoGallery'
 import ShowPhoneButton from '@/components/ShowPhoneButton'
 import ListingTabs from '@/components/ListingTabs'
 import ListingCard from '@/components/ListingCard'
+import ReportButton from '@/components/ReportButton'
 
 interface PageProps {
   params: { id: string }
@@ -212,9 +213,7 @@ export default async function ListingPage({ params }: PageProps) {
 
             {/* Пожаловаться */}
             <div className="text-center mt-4">
-              <button className="text-xs text-gray-400 hover:text-red-500 transition-colors">
-                Пожаловаться на объявление
-              </button>
+              <ReportButton listingId={listing.id} />
             </div>
           </div>
 
