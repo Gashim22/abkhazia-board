@@ -134,8 +134,8 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           <span className="text-4xl leading-none">{category.icon}</span>
         )}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{category.name}</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-montserrat)' }}>{category.name}</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {total > 0 ? `${total} объявлений` : 'Нет объявлений'}
           </p>
         </div>

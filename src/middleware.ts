@@ -29,6 +29,7 @@ export async function middleware(request: NextRequest) {
 
   if (!user && (
     request.nextUrl.pathname.startsWith('/create') ||
+    request.nextUrl.pathname.startsWith('/edit') ||
     request.nextUrl.pathname.startsWith('/profile') ||
     request.nextUrl.pathname.startsWith('/messages')
   )) {

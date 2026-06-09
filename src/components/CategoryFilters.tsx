@@ -3,131 +3,167 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 
-interface City {
-  id: number
-  name: string
-  slug: string
-}
-
-interface CategoryFiltersProps {
-  cities: City[]
-}
+interface City { id: number; name: string; slug: string }
 
 const SORT_OPTIONS = [
-  { value: 'newest',    label: 'Новые' },
-  { value: 'price_asc', label: 'Дешевле' },
-  { value: 'price_desc',label: 'Дороже' },
-  { value: 'score',     label: 'По рейтингу' },
+  { value: 'newest',     label: 'Новые' },
+  { value: 'price_asc',  label: 'Дешевле' },
+  { value: 'price_desc', label: 'Дороже' },
+  { value: 'score',      label: 'По рейтингу' },
 ]
 
-export default function CategoryFilters({ cities }: CategoryFiltersProps) {
-  const router      = useRouter()
-  const pathname    = usePathname()
+export default function CategoryFilters({ cities }: { cities: City[] }) {
+  const router       = useRouter()
+  const pathname     = usePathname()
   const searchParams = useSearchParams()
 
-  // Обновляем один параметр, сбрасывая страницу пагинации
-  const setParam = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (value) {
-        params.set(key, value)
-      } else {
-        params.delete(key)
-      }
-      params.delete('page') // при смене фильтра возвращаемся на стр. 1
-      router.push(`${pathname}?${params.toString()}`)
-    },
-    [pathname, router, searchParams]
-  )
+  const setParam = useCallback((key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) params.set(key, value); else params.delete(key)
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`)
+  }, [pathname, router, searchParams])
 
-  const city       = searchParams.get('city')       ?? ''
-  const priceFrom  = searchParams.get('price_from') ?? ''
-  const priceTo    = searchParams.get('price_to')   ?? ''
-  const sort       = searchParams.get('sort')       ?? 'newest'
-
+  const city      = searchParams.get('city')       ?? ''
+  const priceFrom = searchParams.get('price_from') ?? ''
+  const priceTo   = searchParams.get('price_to')   ?? ''
+  const sort      = searchParams.get('sort')       ?? 'newest'
   const hasFilters = city || priceFrom || priceTo || sort !== 'newest'
 
-  function reset() {
-    router.push(pathname)
-  }
-
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
-      <div className="flex flex-wrap gap-3 items-end">
+    <div style={{
+      background:   'var(--bg-card)',
+      border:       '1px solid var(--border)',
+      borderRadius: '16px',
+      padding:      '16px 20px',
+      marginBottom: '24px',
+    }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
 
-        {/* Город */}
-        <div className="flex flex-col gap-1 min-w-[140px]">
-          <label className="text-xs text-gray-500 font-medium">Город</label>
+        {/* ── Город ── */}
+        <div style={{ position: 'relative', minWidth: '160px' }}>
+          <span style={{
+            position: 'absolute', left: '12px', top: '50%',
+            transform: 'translateY(-50%)', fontSize: '14px', pointerEvents: 'none',
+          }}>📍</span>
           <select
             value={city}
-            onChange={(e) => setParam('city', e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
-                       bg-white cursor-pointer"
+            onChange={e => setParam('city', e.target.value)}
+            style={{
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              background:   'var(--bg-primary)',
+              border:       '1px solid var(--border)',
+              borderRadius: '10px',
+              padding:      '8px 32px 8px 34px',
+              fontSize:     '14px',
+              color:        'var(--text-primary)',
+              cursor:       'pointer',
+              outline:      'none',
+              width:        '100%',
+            }}
           >
             <option value="">Все города</option>
-            {cities.map((c) => (
+            {cities.map(c => (
               <option key={c.id} value={c.slug}>{c.name}</option>
             ))}
           </select>
+          <span style={{
+            position: 'absolute', right: '10px', top: '50%',
+            transform: 'translateY(-50%)', fontSize: '10px',
+            color: 'var(--text-muted)', pointerEvents: 'none',
+          }}>▾</span>
         </div>
 
-        {/* Цена от */}
-        <div className="flex flex-col gap-1 w-[110px]">
-          <label className="text-xs text-gray-500 font-medium">Цена от</label>
-          <input
-            type="number"
-            placeholder="0"
+        {/* ── Цена от–до ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <PriceInput
+            placeholder="от"
             value={priceFrom}
-            min={0}
-            onChange={(e) => setParam('price_from', e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20"
+            onChange={v => setParam('price_from', v)}
           />
-        </div>
-
-        {/* Цена до */}
-        <div className="flex flex-col gap-1 w-[110px]">
-          <label className="text-xs text-gray-500 font-medium">Цена до</label>
-          <input
-            type="number"
-            placeholder="∞"
+          <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>—</span>
+          <PriceInput
+            placeholder="до"
             value={priceTo}
-            min={0}
-            onChange={(e) => setParam('price_to', e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20"
+            onChange={v => setParam('price_to', v)}
           />
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>₽</span>
         </div>
 
-        {/* Сортировка */}
-        <div className="flex flex-col gap-1 min-w-[150px]">
-          <label className="text-xs text-gray-500 font-medium">Сортировка</label>
-          <select
-            value={sort}
-            onChange={(e) => setParam('sort', e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg
-                       outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
-                       bg-white cursor-pointer"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+        {/* ── Разделитель ── */}
+        <div style={{ width: '1px', height: '28px', background: 'var(--border)',
+                      display: 'none' }} className="sm:block" />
+
+        {/* ── Сортировка — pills ── */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {SORT_OPTIONS.map(o => (
+            <button
+              key={o.value}
+              onClick={() => setParam('sort', o.value === 'newest' ? '' : o.value)}
+              style={{
+                padding:      '6px 14px',
+                borderRadius: '20px',
+                fontSize:     '13px',
+                fontWeight:   sort === o.value ? 600 : 400,
+                border:       `1px solid ${sort === o.value ? 'var(--accent)' : 'var(--border)'}`,
+                background:   sort === o.value ? 'var(--accent)' : 'transparent',
+                color:        sort === o.value ? '#fff' : 'var(--text-secondary)',
+                cursor:       'pointer',
+                transition:   'all 0.15s ease',
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
         </div>
 
-        {/* Сброс */}
+        {/* ── Сброс ── */}
         {hasFilters && (
           <button
-            onClick={reset}
-            className="px-4 py-2 text-sm text-gray-500 hover:text-[#1a6b3c]
-                       border border-gray-200 rounded-lg hover:border-[#2d9e5f]
-                       transition-colors self-end"
+            onClick={() => router.push(pathname)}
+            style={{
+              marginLeft:   'auto',
+              padding:      '6px 14px',
+              borderRadius: '20px',
+              fontSize:     '13px',
+              border:       '1px solid var(--border)',
+              background:   'transparent',
+              color:        'var(--text-muted)',
+              cursor:       'pointer',
+              transition:   'all 0.15s ease',
+            }}
           >
-            Сбросить
+            ✕ Сбросить
           </button>
         )}
       </div>
     </div>
+  )
+}
+
+function PriceInput({ placeholder, value, onChange }: {
+  placeholder: string; value: string; onChange: (v: string) => void
+}) {
+  return (
+    <input
+      type="number"
+      placeholder={placeholder}
+      value={value}
+      min={0}
+      onChange={e => onChange(e.target.value)}
+      style={{
+        width:        '80px',
+        padding:      '7px 10px',
+        borderRadius: '10px',
+        border:       '1px solid var(--border)',
+        background:   'var(--bg-primary)',
+        color:        'var(--text-primary)',
+        fontSize:     '14px',
+        outline:      'none',
+        /* убрать стрелки через inline не получится — добавлено в globals.css */
+      }}
+      className="no-spin"
+    />
   )
 }

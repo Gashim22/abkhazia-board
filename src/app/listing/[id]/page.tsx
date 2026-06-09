@@ -8,6 +8,7 @@ import ShowPhoneButton from '@/components/ShowPhoneButton'
 import ListingTabs from '@/components/ListingTabs'
 import ListingCard from '@/components/ListingCard'
 import ReportButton from '@/components/ReportButton'
+import ListingOwnerPanel from '@/components/ListingOwnerPanel'
 
 interface PageProps {
   params: { id: string }
@@ -98,6 +99,9 @@ export default async function ListingPage({ params }: PageProps) {
 
   return (
     <div>
+      {/* Панель владельца */}
+      <ListingOwnerPanel listingId={listing.id} authorId={listing.user_id} />
+
       {/* Хлебные крошки */}
       <nav className="text-sm text-gray-400 mb-4 flex items-center gap-1 flex-wrap">
         <Link href="/" className="hover:text-[#1a6b3c] transition-colors">Главная</Link>
