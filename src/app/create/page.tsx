@@ -727,8 +727,16 @@ export default function CreatePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Подать объявление</h1>
-      <p className="text-sm text-gray-400 mb-6">Заполните форму — это займёт 2 минуты</p>
+      <h1 style={{
+        color: 'var(--text-primary)',
+        background: 'transparent',
+        fontWeight: 800,
+        fontSize: '32px',
+        marginBottom: '8px',
+      }}>Подать объявление</h1>
+      <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+        Заполните форму — это займёт 2 минуты
+      </p>
 
       <StepIndicator current={step} />
 
