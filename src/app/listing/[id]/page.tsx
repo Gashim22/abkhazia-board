@@ -105,19 +105,11 @@ export default async function ListingPage({ params }: PageProps) {
       {/* Хлебные крошки */}
       <nav style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px',
                     display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-        <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none',
-                                 transition: 'color 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-          Главная
-        </Link>
+        <Link href="/" className="breadcrumb-link">Главная</Link>
         <span>›</span>
         {category && (
           <>
-            <Link href={`/category/${category.slug}`}
-                  style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+            <Link href={`/category/${category.slug}`} className="breadcrumb-link">
               {category.name}
             </Link>
             <span>›</span>
@@ -148,18 +140,7 @@ export default async function ListingPage({ params }: PageProps) {
               <p style={{ fontSize: '30px', fontWeight: 700, color: 'var(--accent)' }}>
                 {formatPrice(listing.price)}
               </p>
-              <button style={{
-                padding: '8px 20px',
-                border: '2px solid var(--accent)',
-                color: 'var(--accent)',
-                background: 'transparent',
-                fontSize: '14px', fontWeight: 500,
-                borderRadius: '12px', cursor: 'pointer',
-                transition: 'background 0.2s, color 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
-              >
+              <button className="btn-offer">
                 Сделать предложение
               </button>
             </div>

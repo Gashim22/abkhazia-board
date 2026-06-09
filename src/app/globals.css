@@ -102,6 +102,31 @@ body {
   transform: translateY(-1px);
 }
 
+/* ── Хлебные крошки ────────────────────────────────────── */
+.breadcrumb-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.breadcrumb-link:hover { color: var(--accent); }
+
+/* ── Кнопка "Сделать предложение" ──────────────────────── */
+.btn-offer {
+  padding: 8px 20px;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.btn-offer:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ── Поля формы ─────────────────────────────────────────── */
 .form-label {
   display: block;
