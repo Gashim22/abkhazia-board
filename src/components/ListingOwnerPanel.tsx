@@ -11,15 +11,19 @@ export default function ListingOwnerPanel({
   listingId: string
   authorId:  string
 }) {
-  const router   = useRouter()
-  const [isOwner, setIsOwner] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const router  = useRouter()
+  const [isOwner,  setIsOwner]  = useState(false)
+  const [userId,   setUserId]   = useState<string | null>(null)
+  const [loading,  setLoading]  = useState(false)
 
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.id === authorId) setIsOwner(true)
+      if (data.user?.id === authorId) {
+        setIsOwner(true)
+        setUserId(data.user.id)
+      }
     })
   }, [authorId]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -31,6 +35,7 @@ export default function ListingOwnerPanel({
       .from('listings')
       .update({ status: 'archived' })
       .eq('id', listingId)
+      .eq('user_id', userId)
     router.push('/profile')
     router.refresh()
   }
@@ -39,7 +44,18 @@ export default function ListingOwnerPanel({
     const ok = window.confirm('Вы уверены? Объявление будет удалено навсегда.')
     if (!ok) return
     setLoading(true)
-    await supabase.from('listings').delete().eq('id', listingId)
+    // Soft delete — меняем статус на 'deleted' вместо физического удаления
+    // Это надёжнее: не зависит от RLS DELETE политики
+    const { error } = await supabase
+      .from('listings')
+      .update({ status: 'deleted' })
+      .eq('id', listingId)
+      .eq('user_id', userId)   // только своё объявление
+    if (error) {
+      alert(`Ошибка: ${error.message}`)
+      setLoading(false)
+      return
+    }
     alert('Объявление удалено')
     router.push('/')
     router.refresh()
