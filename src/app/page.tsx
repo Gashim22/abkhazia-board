@@ -96,7 +96,7 @@ export default async function HomePage() {
           Покупайте и продавайте легко
         </p>
         <Link
-          href="/listings/new"
+          href="/create"
           className="inline-block px-8 py-3 bg-white text-[#1a6b3c] font-semibold
                      rounded-xl hover:bg-gray-50 transition-colors shadow-md"
         >
@@ -139,7 +139,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Свежие объявления</h2>
           <Link
-            href="/listings"
+            href="/search?q="
             className="text-sm text-[#2d9e5f] hover:text-[#1a6b3c] font-medium transition-colors"
           >
             Смотреть все →
@@ -152,7 +152,7 @@ export default async function HomePage() {
             <p className="text-lg font-medium">Объявлений пока нет</p>
             <p className="text-sm mt-1">Будьте первым — подайте объявление</p>
             <Link
-              href="/listings/new"
+              href="/create"
               className="inline-block mt-6 px-6 py-2 bg-[#1a6b3c] text-white
                          text-sm font-medium rounded-lg hover:bg-[#2d9e5f] transition-colors"
             >
@@ -180,7 +180,7 @@ export default async function HomePage() {
             {/* Кнопка «Показать больше» */}
             <div className="text-center mt-10">
               <Link
-                href="/listings"
+                href="/search?q="
                 className="inline-block px-8 py-3 border-2 border-[#1a6b3c] text-[#1a6b3c]
                            font-medium rounded-xl hover:bg-[#1a6b3c] hover:text-white
                            transition-colors"
