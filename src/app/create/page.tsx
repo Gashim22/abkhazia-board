@@ -97,6 +97,19 @@ function Step1({
     return !Object.keys(e).length
   }
 
+  const placeholders: Record<string, string> = {
+    'avto':         'Например: Toyota Camry 2020, отличное состояние',
+    'nedvizhimost': 'Например: 2-комнатная квартира в центре Сухума',
+    'rabota':       'Например: Требуется повар в ресторан, опыт от 2 лет',
+    'uslugi':       'Например: Ремонт квартир под ключ, выезд по всей Абхазии',
+    'elektronika':  'Например: iPhone 15 Pro 256GB, как новый',
+    'odezhda':      'Например: Куртка зимняя мужская, размер L',
+    'zhivotnye':    'Например: Щенки немецкой овчарки, 2 месяца',
+    'mebel':        'Например: Диван угловой, состояние хорошее',
+    'stroy':        'Например: Цемент М500, 50 мешков',
+    'raznoe':       'Например: Продам велосипед горный',
+  }
+
   const selected = categories.find(c => c.id === form.category_id)
 
   return (
@@ -135,7 +148,7 @@ function Step1({
               <CharCounter value={form.title} max={100} />
             </div>
             <input type="text" value={form.title} maxLength={100}
-              placeholder="Например: iPhone 15 Pro, 256GB, чёрный"
+              placeholder={placeholders[selected?.slug ?? ''] ?? 'Введите заголовок'}
               onChange={e => set('title', e.target.value)}
               className={`w-full px-4 py-3 text-sm border rounded-xl outline-none transition-colors
                           ${errors.title ? 'border-red-300' : 'border-gray-200 focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20'}`} />
