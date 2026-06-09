@@ -116,8 +116,8 @@ function Step1({
     <div className="space-y-6">
       {/* Категории */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Категория <span className="text-red-400">*</span>
+        <label className="form-label mb-3">
+          Категория <span style={{ color: '#ef4444' }}>*</span>
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {categories.map(cat => (
@@ -144,51 +144,49 @@ function Step1({
           {/* Заголовок */}
           <div>
             <div className="flex justify-between mb-1">
-              <label className="text-sm font-medium text-gray-700">Заголовок <span className="text-red-400">*</span></label>
+              <label className="form-label">Заголовок <span style={{ color: '#ef4444' }}>*</span></label>
               <CharCounter value={form.title} max={100} />
             </div>
             <input type="text" value={form.title} maxLength={100}
               placeholder={placeholders[selected?.slug ?? ''] ?? 'Введите заголовок'}
               onChange={e => set('title', e.target.value)}
-              className={`w-full px-4 py-3 text-sm border rounded-xl outline-none transition-colors
-                          ${errors.title ? 'border-red-300' : 'border-gray-200 focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20'}`} />
+              className={`form-input ${errors.title ? '!border-red-400' : ''}`} />
             {errors.title && <p className="text-xs text-red-400 mt-1">{errors.title}</p>}
           </div>
 
           {/* Описание */}
           <div>
             <div className="flex justify-between mb-1">
-              <label className="text-sm font-medium text-gray-700">Описание <span className="text-red-400">*</span></label>
+              <label className="form-label">Описание <span style={{ color: '#ef4444' }}>*</span></label>
               <CharCounter value={form.description} max={3000} />
             </div>
             <textarea value={form.description} maxLength={3000} rows={5}
               placeholder="Опишите товар: состояние, комплектация, причина продажи..."
               onChange={e => set('description', e.target.value)}
-              className={`w-full px-4 py-3 text-sm border rounded-xl outline-none resize-none transition-colors
-                          ${errors.description ? 'border-red-300' : 'border-gray-200 focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20'}`} />
+              className={`form-input resize-none ${errors.description ? '!border-red-400' : ''}`} />
             {errors.description && <p className="text-xs text-red-400 mt-1">{errors.description}</p>}
           </div>
 
           {/* Цена */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Цена <span className="text-red-400">*</span>
+            <label className="form-label mb-1">
+              Цена <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
                 <input type="number" value={form.price} min={0} placeholder="0"
                   disabled={form.is_negotiable}
                   onChange={e => set('price', e.target.value)}
-                  className={`w-full px-4 py-3 pr-8 text-sm border rounded-xl outline-none transition-colors
-                              disabled:bg-gray-50 disabled:text-gray-400
-                              ${errors.price ? 'border-red-300' : 'border-gray-200 focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20'}`} />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">₽</span>
+                  className={`form-input pr-8 no-spin ${errors.price ? '!border-red-400' : ''}`} />
+                <span style={{ position: 'absolute', right: '12px', top: '50%',
+                               transform: 'translateY(-50%)', color: 'var(--text-muted)',
+                               fontSize: '14px' }}>₽</span>
               </div>
               <label className="flex items-center gap-2 cursor-pointer shrink-0">
                 <input type="checkbox" checked={form.is_negotiable}
                   className="w-4 h-4 accent-[#1a6b3c]"
                   onChange={e => { set('is_negotiable', e.target.checked); if (e.target.checked) set('price', '') }} />
-                <span className="text-sm text-gray-700">Договорная</span>
+                <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>Договорная</span>
               </label>
             </div>
             {errors.price && <p className="text-xs text-red-400 mt-1">{errors.price}</p>}
@@ -196,13 +194,12 @@ function Step1({
 
           {/* Город */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Город <span className="text-red-400">*</span>
+            <label className="form-label mb-1">
+              Город <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <select value={form.city_id ?? ''}
               onChange={e => set('city_id', e.target.value ? Number(e.target.value) : null)}
-              className={`w-full px-4 py-3 text-sm border rounded-xl outline-none bg-white transition-colors
-                          ${errors.city_id ? 'border-red-300' : 'border-gray-200 focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20'}`}>
+              className={`form-input ${errors.city_id ? '!border-red-400' : ''}`}>
               <option value="">Выберите город</option>
               {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -550,30 +547,39 @@ function Step3({
     <div className="space-y-6">
 
       {/* Превью объявления */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)',
+                    borderRadius: '12px', overflow: 'hidden' }}>
         {/* Фото обложки */}
         {photos[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={photos[0].storageUrl!} alt="Обложка"
                className="w-full h-56 object-cover" />
         ) : (
-          <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-300 text-5xl">
+          <div style={{ width: '100%', height: '160px', background: 'var(--bg-secondary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '48px', color: 'var(--text-muted)' }}>
             📷
           </div>
         )}
 
         <div className="p-5">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{form.title}</h2>
-          <p className="text-2xl font-bold text-[#1a6b3c] mb-3">{formatPrice()}</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)',
+                       marginBottom: '8px' }}>{form.title}</h2>
+          <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--accent)',
+                      marginBottom: '12px' }}>{formatPrice()}</p>
 
-          <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px',
+                        fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
             {city     && <span>📍 {city.name}</span>}
             {category && <span>🏷 {category.name}</span>}
             <span>📅 Только что</span>
           </div>
 
           {form.description && (
-            <p className="text-sm text-gray-600 line-clamp-3 whitespace-pre-wrap">
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)',
+                        display: '-webkit-box', WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        whiteSpace: 'pre-wrap' }}>
               {form.description}
             </p>
           )}
@@ -584,7 +590,9 @@ function Step3({
               {photos.slice(1).map((p, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={i} src={p.storageUrl!} alt=""
-                     className="w-14 h-14 rounded-lg object-cover shrink-0 border border-gray-100" />
+                     style={{ width: '56px', height: '56px', borderRadius: '8px',
+                              objectFit: 'cover', flexShrink: 0,
+                              border: '1px solid var(--border)' }} />
               ))}
             </div>
           )}
@@ -592,15 +600,19 @@ function Step3({
       </div>
 
       {/* Чек-лист заполненных данных */}
-      <div className="bg-[#f4f7f5] rounded-xl border border-green-100 p-5">
-        <h3 className="text-sm font-semibold text-[#1a6b3c] mb-4 flex items-center gap-2">
+      <div style={{ background: 'var(--accent-light)', borderRadius: '12px',
+                    border: '1px solid var(--border)', padding: '20px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
+                     marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           ✅ Ваше объявление готово к публикации
         </h3>
-        <div className="divide-y divide-green-100">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           {summary.map(({ label, value }) => (
-            <div key={label} className="flex justify-between py-2 text-sm">
-              <span className="text-gray-500">{label}</span>
-              <span className="font-medium text-gray-800">{value}</span>
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between',
+                                      padding: '8px 0', fontSize: '14px',
+                                      borderBottom: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>{label}</span>
+              <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{value}</span>
             </div>
           ))}
         </div>
@@ -617,8 +629,7 @@ function Step3({
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <button type="button" onClick={onBack}
           disabled={publishing}
-          className="px-6 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl
-                     hover:border-gray-400 transition-colors disabled:opacity-50">
+          className="btn-secondary disabled:opacity-50">
           ← Редактировать
         </button>
         <button type="button" onClick={handlePublish}
@@ -648,27 +659,19 @@ function SuccessScreen({
   return (
     <div className="text-center py-10">
       <div className="text-7xl mb-6">🎉</div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)',
+                   marginBottom: '8px' }}>
         Объявление опубликовано!
       </h2>
-      <p className="text-gray-500 mb-8">
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
         Ваше объявление уже доступно всем пользователям сайта
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <a
-          href={`/listing/${listingId}`}
-          className="px-8 py-3 bg-[#1a6b3c] text-white font-medium rounded-xl
-                     hover:bg-[#2d9e5f] transition-colors"
-        >
+        <a href={`/listing/${listingId}`} className="btn-primary">
           Смотреть объявление →
         </a>
-        <button
-          type="button"
-          onClick={onReset}
-          className="px-8 py-3 border border-gray-200 text-gray-600 font-medium rounded-xl
-                     hover:border-gray-400 transition-colors"
-        >
+        <button type="button" onClick={onReset} className="btn-secondary">
           Подать ещё одно
         </button>
       </div>
