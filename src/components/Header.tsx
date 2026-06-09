@@ -26,18 +26,23 @@ function SearchInput({ className }: { className?: string }) {
   return (
     <form onSubmit={handleSubmit} className={className}>
       <div className="relative w-full">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-        />
+        <Search size={16}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: 'var(--text-muted)' }} />
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Поиск по объявлениям..."
-          className="w-full pl-9 pr-4 py-2 text-sm bg-[#f4f7f5] border border-gray-200 rounded-lg
-                     outline-none focus:border-[#2d9e5f] focus:ring-2 focus:ring-[#2d9e5f]/20
-                     transition-colors"
+          className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl transition-all"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-primary)',
+            outline: 'none',
+          }}
+          onFocus={e  => (e.target.style.borderColor = 'var(--accent)')}
+          onBlur={e   => (e.target.style.borderColor = 'var(--border)')}
         />
       </div>
     </form>
@@ -51,17 +56,13 @@ function AuthButtons() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Получаем текущего пользователя
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
       setLoading(false)
     })
-
-    // Слушаем изменения сессии (вход / выход)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null)
     })
-
     return () => subscription.unsubscribe()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -71,33 +72,24 @@ function AuthButtons() {
     router.refresh()
   }
 
-  if (loading) {
-    return <div className="w-20 h-9 bg-gray-100 rounded-lg animate-pulse" />
-  }
+  if (loading) return (
+    <div className="w-20 h-9 rounded-xl animate-pulse" style={{ background: 'var(--border)' }} />
+  )
 
-  if (user) {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="hidden sm:block text-sm text-gray-600 max-w-[140px] truncate">
-          {user.email}
-        </span>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300
-                     hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          Выйти
-        </button>
-      </div>
-    )
-  }
+  if (user) return (
+    <div className="flex items-center gap-2">
+      <span className="hidden sm:block text-sm max-w-[130px] truncate"
+            style={{ color: 'var(--text-secondary)' }}>
+        {user.email}
+      </span>
+      <button onClick={handleLogout} className="btn-secondary text-sm py-2 px-4">
+        Выйти
+      </button>
+    </div>
+  )
 
   return (
-    <Link
-      href="/login"
-      className="px-4 py-2 text-sm font-medium text-[#1a6b3c] border border-[#1a6b3c]
-                 hover:bg-[#1a6b3c] hover:text-white rounded-lg transition-colors"
-    >
+    <Link href="/login" className="btn-secondary text-sm py-2 px-4">
       Войти
     </Link>
   )
@@ -105,12 +97,20 @@ function AuthButtons() {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-[#0a1209] shadow-sm border-b border-gray-100 dark:border-gray-800 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
+    <header className="sticky top-0 z-50 transition-all" style={{
+      background: 'var(--header-bg)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderBottom: '1px solid var(--border)',
+      height: '64px',
+    }}>
+      <div className="max-w-7xl mx-auto px-4 h-full flex items-center gap-4">
 
         {/* Логотип */}
-        <Link href="/" className="shrink-0 text-xl font-bold text-[#1a6b3c]">
-          Абхазия.ру
+        <Link href="/" className="shrink-0 text-xl font-bold tracking-tight"
+              style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--text-primary)' }}>
+          Абхазия
+          <span style={{ color: 'var(--accent)' }}>.ру</span>
         </Link>
 
         {/* Поиск — десктоп */}
@@ -120,31 +120,22 @@ export default function Header() {
 
         {/* Правая часть */}
         <div className="flex items-center gap-2 ml-auto shrink-0">
-          <Link
-            href="/create"
-            className="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium
-                       text-white bg-[#1a6b3c] hover:bg-[#2d9e5f] rounded-lg transition-colors"
-          >
+          <Link href="/create"
+                className="hidden sm:inline-flex btn-primary text-sm py-2.5 px-5">
             + Подать объявление
           </Link>
-
-          <Link
-            href="/create"
-            className="sm:hidden flex items-center justify-center w-9 h-9
-                       text-white bg-[#1a6b3c] hover:bg-[#2d9e5f] rounded-lg text-lg font-bold transition-colors"
-            aria-label="Подать объявление"
-          >
+          <Link href="/create"
+                className="sm:hidden btn-primary w-9 h-9 p-0 justify-center text-base font-bold"
+                aria-label="Подать объявление">
             +
           </Link>
-
           <AuthButtons />
           <ThemeToggle />
         </div>
-
       </div>
 
-      {/* Поиск на мобильном */}
-      <div className="md:hidden px-4 pb-3">
+      {/* Мобильный поиск */}
+      <div className="md:hidden px-4 pb-3" style={{ marginTop: '-8px' }}>
         <Suspense fallback={null}>
           <SearchInput />
         </Suspense>
