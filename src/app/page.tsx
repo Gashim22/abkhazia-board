@@ -34,20 +34,19 @@ async function getCategories(): Promise<Category[]> {
 
   if (error || !categories) return []
 
-  const { data: counts } = await supabase
-    .from('listings')
-    .select('category_id')
-    .eq('status', 'active')
+  // Считаем точное количество для каждой категории отдельным count-запросом
+  const categoriesWithCount = await Promise.all(
+    categories.map(async (cat) => {
+      const { count } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', cat.id)
+        .eq('status', 'active')
+      return { ...cat, listings_count: count ?? 0 }
+    })
+  )
 
-  const countMap: Record<number, number> = {}
-  counts?.forEach(({ category_id }) => {
-    if (category_id) countMap[category_id] = (countMap[category_id] ?? 0) + 1
-  })
-
-  return categories.map((cat) => ({
-    ...cat,
-    listings_count: countMap[cat.id] ?? 0,
-  }))
+  return categoriesWithCount
 }
 
 async function getListings(): Promise<Listing[]> {
