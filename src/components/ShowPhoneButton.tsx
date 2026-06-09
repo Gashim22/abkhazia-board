@@ -22,7 +22,8 @@ export default function ShowPhoneButton({ phone, listingId }: ShowPhoneButtonPro
 
   if (!phone) {
     return (
-      <p className="text-sm text-gray-400 text-center py-2">
+      <p style={{ fontSize: '14px', color: 'var(--text-muted)',
+                  textAlign: 'center', padding: '8px 0' }}>
         Телефон не указан
       </p>
     )
@@ -32,18 +33,21 @@ export default function ShowPhoneButton({ phone, listingId }: ShowPhoneButtonPro
     <button
       onClick={handleReveal}
       disabled={loading}
-      className={`w-full py-3 rounded-xl font-medium text-sm transition-all
-                  ${revealed
-                    ? 'bg-[#f4f7f5] text-[#1a6b3c] border border-[#2d9e5f] text-lg tracking-wider cursor-default'
-                    : 'bg-[#1a6b3c] text-white hover:bg-[#2d9e5f] active:scale-95'
-                  }`}
+      style={{
+        width: '100%',
+        padding: '12px',
+        borderRadius: '12px',
+        fontWeight: 500,
+        fontSize: revealed ? '18px' : '14px',
+        letterSpacing: revealed ? '0.05em' : 'normal',
+        cursor: revealed ? 'default' : 'pointer',
+        border: revealed ? '1px solid var(--accent)' : 'none',
+        background: revealed ? 'var(--accent-light)' : 'var(--accent)',
+        color: revealed ? 'var(--accent)' : '#fff',
+        transition: 'all 0.2s ease',
+      }}
     >
-      {loading
-        ? 'Загрузка...'
-        : revealed
-          ? phone
-          : '📞 Показать номер'
-      }
+      {loading ? 'Загрузка...' : revealed ? phone : '📞 Показать номер'}
     </button>
   )
 }

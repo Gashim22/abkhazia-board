@@ -13,24 +13,38 @@ export default function ListingTabs({ description, characteristics }: ListingTab
   return (
     <div>
       {/* Вкладки */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '16px' }}>
         <button
           onClick={() => setTab('description')}
-          className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px
-                      ${tab === 'description'
-                        ? 'border-[#1a6b3c] text-[#1a6b3c]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
+          style={{
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: 500,
+            border: 'none',
+            borderBottom: tab === 'description' ? '2px solid var(--accent)' : '2px solid transparent',
+            marginBottom: '-1px',
+            color: tab === 'description' ? 'var(--accent)' : 'var(--text-secondary)',
+            background: 'transparent',
+            cursor: 'pointer',
+            transition: 'color 0.2s',
+          }}
         >
           Описание
         </button>
         <button
           onClick={() => setTab('characteristics')}
-          className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px
-                      ${tab === 'characteristics'
-                        ? 'border-[#1a6b3c] text-[#1a6b3c]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
+          style={{
+            padding: '8px 16px',
+            fontSize: '14px',
+            fontWeight: 500,
+            border: 'none',
+            borderBottom: tab === 'characteristics' ? '2px solid var(--accent)' : '2px solid transparent',
+            marginBottom: '-1px',
+            color: tab === 'characteristics' ? 'var(--accent)' : 'var(--text-secondary)',
+            background: 'transparent',
+            cursor: 'pointer',
+            transition: 'color 0.2s',
+          }}
         >
           Характеристики
         </button>
@@ -38,23 +52,27 @@ export default function ListingTabs({ description, characteristics }: ListingTab
 
       {/* Содержимое */}
       {tab === 'description' && (
-        <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+        <div style={{ fontSize: '14px', color: 'var(--text-primary)',
+                      lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
           {description?.trim()
             ? description
-            : <span className="text-gray-400">Описание не указано</span>
+            : <span style={{ color: 'var(--text-muted)' }}>Описание не указано</span>
           }
         </div>
       )}
 
       {tab === 'characteristics' && (
-        <div className="divide-y divide-gray-100">
+        <div>
           {characteristics.length === 0 ? (
-            <p className="text-sm text-gray-400">Характеристики не указаны</p>
+            <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
+              Характеристики не указаны
+            </p>
           ) : (
             characteristics.map(({ label, value }) => (
-              <div key={label} className="flex py-2 text-sm">
-                <span className="w-1/2 text-gray-500">{label}</span>
-                <span className="w-1/2 text-gray-900 font-medium">{value}</span>
+              <div key={label} style={{ display: 'flex', padding: '8px 0', fontSize: '14px',
+                                        borderBottom: '1px solid var(--border)' }}>
+                <span style={{ width: '50%', color: 'var(--text-secondary)' }}>{label}</span>
+                <span style={{ width: '50%', color: 'var(--text-primary)', fontWeight: 500 }}>{value}</span>
               </div>
             ))
           )}

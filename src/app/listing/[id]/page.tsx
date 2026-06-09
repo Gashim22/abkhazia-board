@@ -103,19 +103,27 @@ export default async function ListingPage({ params }: PageProps) {
       <ListingOwnerPanel listingId={listing.id} authorId={listing.user_id} />
 
       {/* Хлебные крошки */}
-      <nav className="text-sm text-gray-400 mb-4 flex items-center gap-1 flex-wrap">
-        <Link href="/" className="hover:text-[#1a6b3c] transition-colors">Главная</Link>
+      <nav style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px',
+                    display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+        <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none',
+                                 transition: 'color 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+          Главная
+        </Link>
         <span>›</span>
         {category && (
           <>
             <Link href={`/category/${category.slug}`}
-                  className="hover:text-[#1a6b3c] transition-colors">
+                  style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
               {category.name}
             </Link>
             <span>›</span>
           </>
         )}
-        <span className="text-gray-700 line-clamp-1">{listing.title}</span>
+        <span style={{ color: 'var(--text-primary)' }}>{listing.title}</span>
       </nav>
 
       {/* Основная сетка */}
@@ -128,31 +136,44 @@ export default async function ListingPage({ params }: PageProps) {
           <PhotoGallery photos={listing.photos} title={listing.title} />
 
           {/* Заголовок + цена */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 mb-4">
-            <h1 className="text-xl font-bold text-gray-900 mb-3 leading-snug">
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)',
+                        borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)',
+                         marginBottom: '12px', lineHeight: 1.3 }}>
               {listing.title}
             </h1>
 
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <p className="text-3xl font-bold text-[#1a6b3c]">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          gap: '16px', flexWrap: 'wrap' }}>
+              <p style={{ fontSize: '30px', fontWeight: 700, color: 'var(--accent)' }}>
                 {formatPrice(listing.price)}
               </p>
-              <button
-                className="px-5 py-2 border-2 border-[#1a6b3c] text-[#1a6b3c] text-sm
-                           font-medium rounded-xl hover:bg-[#1a6b3c] hover:text-white
-                           transition-colors"
+              <button style={{
+                padding: '8px 20px',
+                border: '2px solid var(--accent)',
+                color: 'var(--accent)',
+                background: 'transparent',
+                fontSize: '14px', fontWeight: 500,
+                borderRadius: '12px', cursor: 'pointer',
+                transition: 'background 0.2s, color 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.color = '#fff' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--accent)' }}
               >
                 Сделать предложение
               </button>
             </div>
 
             {/* Метаданные */}
-            <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px',
+                          marginTop: '12px', fontSize: '12px', color: 'var(--text-muted)',
+                          flexWrap: 'wrap' }}>
               {city && <span>📍 {city}</span>}
               <span>📅 {formatDate(listing.created_at)}</span>
               <span>👁 {listing.views_count + 1} просмотров</span>
               {listing.score > 200 && (
-                <span className="px-2 py-0.5 bg-[#1a6b3c] text-white rounded-md font-bold">
+                <span style={{ padding: '2px 8px', background: 'var(--accent)',
+                               color: '#fff', borderRadius: '6px', fontWeight: 700 }}>
                   VIP
                 </span>
               )}
@@ -160,7 +181,8 @@ export default async function ListingPage({ params }: PageProps) {
           </div>
 
           {/* Вкладки: описание / характеристики */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)',
+                        borderRadius: '12px', padding: '20px' }}>
             <ListingTabs
               description={listing.description}
               characteristics={characteristics}
@@ -172,27 +194,31 @@ export default async function ListingPage({ params }: PageProps) {
         <div className="lg:w-72 xl:w-80 shrink-0 flex flex-col gap-4">
 
           {/* Карточка продавца */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)',
+                        borderRadius: '16px', padding: '20px' }}>
+            <h3 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)',
+                         textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
               Продавец
             </h3>
 
-            <div className="flex items-center gap-3 mb-5">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
               {/* Аватар */}
-              <div className="w-12 h-12 rounded-full bg-[#f4f7f5] border border-gray-200
-                              flex items-center justify-center text-xl shrink-0 overflow-hidden">
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%',
+                            background: 'var(--accent-light)', border: '1px solid var(--border)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '20px', flexShrink: 0, overflow: 'hidden' }}>
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="Аватар" // eslint-disable-line @next/next/no-img-element
-                         className="w-full h-full object-cover" />
+                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : '👤'
                 }
               </div>
               <div>
-                <p className="font-semibold text-gray-900 text-sm">
+                <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>
                   {profile?.name ?? 'Пользователь'}
                 </p>
                 {profile?.created_at && (
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                     На сайте с {formatDate(profile.created_at)}
                   </p>
                 )}
@@ -208,41 +234,40 @@ export default async function ListingPage({ params }: PageProps) {
             {/* Написать сообщение */}
             <button
               disabled
-              className="w-full mt-3 py-3 rounded-xl text-sm font-medium
-                         bg-gray-100 text-gray-400 cursor-not-allowed"
+              style={{ width: '100%', marginTop: '12px', padding: '12px',
+                       borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                       background: 'var(--bg-secondary)', color: 'var(--text-muted)',
+                       cursor: 'not-allowed', border: '1px solid var(--border)' }}
               title="Будет доступно в следующем обновлении"
             >
               💬 Написать сообщение
             </button>
 
             {/* Пожаловаться */}
-            <div className="text-center mt-4">
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
               <ReportButton listingId={listing.id} />
             </div>
           </div>
 
           {/* Блок безопасности */}
-          <div className="bg-[#f4f7f5] rounded-xl border border-green-100 p-4">
-            <h3 className="text-sm font-semibold text-[#1a6b3c] mb-3 flex items-center gap-2">
+          <div style={{ background: 'var(--accent-light)', borderRadius: '16px',
+                        border: '1px solid var(--border)', padding: '16px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent)',
+                         marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               🛡 Безопасная сделка
             </h3>
-            <ul className="space-y-2 text-xs text-gray-600">
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                Встречайтесь в людных местах
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                Проверяйте товар перед оплатой
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                Не переводите деньги заранее
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 mt-0.5">✓</span>
-                Берите чек или расписку
-              </li>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '8px',
+                         fontSize: '12px', color: 'var(--text-secondary)', listStyle: 'none',
+                         padding: 0, margin: 0 }}>
+              {['Встречайтесь в людных местах',
+                'Проверяйте товар перед оплатой',
+                'Не переводите деньги заранее',
+                'Берите чек или расписку'].map(tip => (
+                <li key={tip} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                  <span style={{ color: 'var(--accent)', marginTop: '1px' }}>✓</span>
+                  {tip}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -252,7 +277,8 @@ export default async function ListingPage({ params }: PageProps) {
       {/* ── Другие объявления продавца ───────────────────────── */}
       {sellerListings.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)',
+                       marginBottom: '16px' }}>
             Другие объявления продавца
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -276,7 +302,8 @@ export default async function ListingPage({ params }: PageProps) {
       {/* ── Похожие объявления ───────────────────────────────── */}
       {similarListings.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)',
+                       marginBottom: '16px' }}>
             Похожие объявления
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
