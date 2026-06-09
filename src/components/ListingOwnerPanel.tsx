@@ -40,7 +40,8 @@ export default function ListingOwnerPanel({
     if (!ok) return
     setLoading(true)
     await supabase.from('listings').delete().eq('id', listingId)
-    router.push('/profile')
+    alert('Объявление удалено')
+    router.push('/')
     router.refresh()
   }
 
