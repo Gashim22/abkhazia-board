@@ -5,6 +5,7 @@ import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, FormEvent, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import type { User } from '@supabase/supabase-js'
 
 function SearchInput({ className }: { className?: string }) {
@@ -104,7 +105,7 @@ function AuthButtons() {
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-white dark:bg-[#0a1209] shadow-sm border-b border-gray-100 dark:border-gray-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
 
         {/* Логотип */}
@@ -137,6 +138,7 @@ export default function Header() {
           </Link>
 
           <AuthButtons />
+          <ThemeToggle />
         </div>
 
       </div>
